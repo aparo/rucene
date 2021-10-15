@@ -22,6 +22,7 @@ use std::io::{self, Read};
 use std::path::Path;
 use std::slice;
 use std::sync::Arc;
+use std::convert::TryInto;
 
 pub struct ReadOnlySource {
     map: Arc<Mmap>,
@@ -178,7 +179,7 @@ impl MmapIndexInput {
             };
             let mmap = unsafe {
                 MmapOptions::new()
-                    .offset(offset)
+                    .offset(offset.try_into().unwrap())
                     .len(adapted_len)
                     .map(&file)?
             };
