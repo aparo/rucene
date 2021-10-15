@@ -11,7 +11,7 @@ can easily be used to add full text search capabilities to applications.
 """
 
 [dependencies]
-bytes = "0.4"
+bytes = "1.1.0"
 chan = "0.1.21"
 chan-signal = "0.3.1"
 crc = "1.5.0"
