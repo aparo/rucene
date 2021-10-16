@@ -1651,7 +1651,7 @@ impl Packed64SingleBlock {
     pub fn new(value_count: usize, bits_per_value: usize) -> Packed64SingleBlock {
         debug_assert!(
             Self::is_supported(bits_per_value),
-            format!("Unsupported number of bits per value: {}", bits_per_value)
+            "Unsupported number of bits per value: {}", bits_per_value
         );
         let value_per_block = 64 / bits_per_value;
         let blocks = vec![0i64; Self::required_capacity(value_count, value_per_block)];
@@ -2629,10 +2629,10 @@ impl PackedIntDecoder for BulkOperationPacked {
 
     fn decode_long_to_int(&self, blocks: &[i64], values: &mut [i32], iterations: usize) {
         if self.bits_per_value > 32 {
-            panic!(format!(
+            panic!(
                 "Cannot decode {} -bits values into an i32 slice",
                 self.bits_per_value
-            ));
+            );
         }
 
         let mut bits_left = 64;
@@ -2815,10 +2815,10 @@ impl PackedIntDecoder for BulkOperationPackedSingleBlock {
 
     fn decode_long_to_int(&self, blocks: &[i64], values: &mut [i32], iterations: usize) {
         if self.bits_per_value > 32 {
-            panic!(format!(
+            panic!(
                 "Cannot decode {} -bits values into an i32 slice",
                 self.bits_per_value
-            ));
+            );
         }
         let mut values_offset = 0;
         for b in blocks.iter().take(iterations) {
@@ -2828,10 +2828,10 @@ impl PackedIntDecoder for BulkOperationPackedSingleBlock {
 
     fn decode_byte_to_int(&self, blocks: &[u8], values: &mut [i32], iterations: usize) {
         if self.bits_per_value > 32 {
-            panic!(format!(
+            panic!(
                 "Cannot decode {} -bits values into an i32 slice",
                 self.bits_per_value
-            ));
+            );
         }
         let mut values_offset = 0;
         for i in 0..iterations {

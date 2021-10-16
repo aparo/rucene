@@ -2848,7 +2848,10 @@ where
                     .fetch_sub(info.info.max_doc as i64, Ordering::AcqRel);
                 if merge.segments.contains(info) {
                     self.merging_segments.remove(&info.info.name);
-                    merge.segments.remove_item(info);
+                    // merge.segments.remove_item(info);
+                    // merge.segments.remove(merge.segments.iter().position(|x| *x == info));
+                    let index = merge.segments.iter().position(|x| *x == *info).unwrap();
+                    merge.segments.remove(index);
                 }
                 self.reader_pool.drop(info.as_ref())?;
             }
