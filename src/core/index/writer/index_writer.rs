@@ -2773,7 +2773,7 @@ where
         index_writer
             .writer
             .rate_limiters
-            .get_or(|| Box::new(Arc::clone(&merge.rate_limiter)));
+            .get_or(|| Arc::clone(&merge.rate_limiter));
 
         // let t0 = SystemTime::now();
 

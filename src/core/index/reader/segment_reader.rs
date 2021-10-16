@@ -19,7 +19,7 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex, RwLock};
 
 use error::{ErrorKind::IllegalArgument, ErrorKind::IllegalState, Result};
-use thread_local::{CachedThreadLocal, ThreadLocal};
+use thread_local::{ThreadLocal};
 
 use core::codec::doc_values::{
     BinaryDocValues, BinaryDocValuesProvider, DocValuesFormat, DocValuesProducer,
@@ -529,7 +529,7 @@ pub struct SegmentReader<D: Directory, C: Codec> {
     dv_producers_preload: Arc<RwLock<Vec<Arc<dyn DocValuesProducer>>>>,
     dv_producer_local: ThreadLocalDocValueProducer,
     dv_providers_preload: Arc<RwLock<Vec<RefCell<HashMap<String, DocValuesProviderEnum>>>>>,
-    dv_provider_local: CachedThreadLocal<RefCell<HashMap<String, DocValuesProviderEnum>>>,
+    dv_provider_local: ThreadLocal<RefCell<HashMap<String, DocValuesProviderEnum>>>,
 }
 
 unsafe impl<D: Directory + Send + Sync + 'static, C: Codec> Sync for SegmentReader<D, C> {}
@@ -568,12 +568,12 @@ impl<D: Directory + 'static, C: Codec> SegmentReader<D, C> {
                     SegmentDocValues::get_dv_provider(dv_producer.clone(), field_infos.clone());
                 dv_providers_preload.push(RefCell::new(dvs));
             }
-            dv_producer_local.get_or(|| Box::new(dv_producer));
+            dv_producer_local.get_or(|| dv_producer);
         }
 
-        let dv_provider_local = CachedThreadLocal::new();
+        let dv_provider_local = ThreadLocal::new();
         if let Some(dv_preload) = dv_providers_preload.pop() {
-            dv_provider_local.get_or(|| Box::new(dv_preload));
+            dv_provider_local.get_or(|| dv_preload);
         }
 
         SegmentReader {
@@ -761,7 +761,7 @@ impl<D: Directory + 'static, C: Codec> SegmentReader<D, C> {
             }
 
             if let Some(dv_producer) = self.dv_producers_preload.write()?.pop() {
-                self.dv_producer_local.get_or(|| Box::new(dv_producer));
+                self.dv_producer_local.get_or(|| dv_producer);
 
                 return Ok(());
             }
@@ -771,7 +771,7 @@ impl<D: Directory + 'static, C: Codec> SegmentReader<D, C> {
                 self.si.as_ref(),
                 self.field_infos.clone(),
             ) {
-                self.dv_producer_local.get_or(|| Box::new(dv_producer));
+                self.dv_producer_local.get_or(|| dv_producer);
             }
         }
         Ok(())
@@ -801,9 +801,9 @@ impl<D: Directory + 'static, C: Codec> SegmentReader<D, C> {
 
         Ok(self.dv_provider_local.get_or(|| {
             if let Some(dv_preload) = self.dv_providers_preload.write().unwrap().pop() {
-                Box::new(dv_preload)
+                dv_preload
             } else {
-                Box::new(RefCell::new(HashMap::new()))
+                RefCell::new(HashMap::new())
             }
         }))
     }
