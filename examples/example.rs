@@ -95,7 +95,7 @@ fn main() -> Result<()> {
     let stored_text_field = new_stored_text_field("title.raw".into(), text.into());
     doc.push(Box::new(stored_text_field));
     // add numeric doc value field
-    doc.push(Box::new(NumericDocValuesField::new("weight".into(), 1)));
+    doc.push(Box::new(NumericDocValuesField::new("weight", 1)));
 
     // add the document
     writer.add_document(doc)?;
@@ -126,7 +126,7 @@ fn main() -> Result<()> {
         // fetch stored fields
         let stored_fields = vec!["title.raw".into()];
         let stored_doc = index_searcher.reader().document(doc_id, &stored_fields)?;
-        if stored_doc.fields.len() > 0 {
+        if !stored_doc.fields.is_empty() {
             println!("    stroed fields: ");
             for s in &stored_doc.fields {
                 println!(
